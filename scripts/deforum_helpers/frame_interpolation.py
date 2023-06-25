@@ -8,6 +8,7 @@ from modules.shared import opts
 import tempfile
 import base64
 import shutil
+from .video_audio_utilities import find_ffmpeg_binary
 
 DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
@@ -245,14 +246,14 @@ def process_interp_base64_pic(pic_base64_list, engine, x_am, sl_enabled, sl_am, 
     folder_name = "base64_pics"
     
     #delete os.getcwd(), 'outputs', 'frame-interpolation', folder_name before creating new one
-    if(os.path.exists(os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name))):
-        shutil.rmtree(os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name))
+    if(os.path.exists(os.path.join('outputs', 'frame-interpolation', folder_name))):
+        shutil.rmtree(os.path.join('outputs', 'frame-interpolation', folder_name))
 
 
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
+    outdir_no_tmp = os.path.join('outputs', 'frame-interpolation', folder_name)
     i = 1
     while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
+        outdir_no_tmp = os.path.join('outputs', 'frame-interpolation', folder_name + '_' + str(i))
         i += 1
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
@@ -265,6 +266,7 @@ def process_interp_base64_pic(pic_base64_list, engine, x_am, sl_enabled, sl_am, 
     if add_soundtrack == 'File':
         audio_file_to_pass = audio_track
 
+    f_location = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
     
     return process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
 
