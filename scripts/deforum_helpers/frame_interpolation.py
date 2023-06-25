@@ -245,15 +245,16 @@ def process_interp_base64_pic(pic_base64_list, engine, x_am, sl_enabled, sl_am, 
     print(f"got a request to *frame interpolate* a set of {len(pic_base64_list)} images.")
     folder_name = "base64_pics"
     
+    outpath_samples = opts.outdir_txt2img_samples
     #delete os.getcwd(), 'outputs', 'frame-interpolation', folder_name before creating new one
-    if(os.path.exists(os.path.join('output', 'frame-interpolation', folder_name))):
-        shutil.rmtree(os.path.join('output', 'frame-interpolation', folder_name))
+    if(os.path.exists(os.path.join(outpath_samples, 'frame-interpolation', folder_name))):
+        shutil.rmtree(os.path.join(outpath_samples, 'frame-interpolation', folder_name))
 
 
-    outdir_no_tmp = os.path.join('output', 'frame-interpolation', folder_name)
+    outdir_no_tmp = os.path.join(outpath_samples, 'frame-interpolation', folder_name)
     i = 1
     while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join('output', 'frame-interpolation', folder_name + '_' + str(i))
+        outdir_no_tmp = os.path.join(outpath_samples, 'frame-interpolation', folder_name + '_' + str(i))
         i += 1
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
