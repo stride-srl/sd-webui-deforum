@@ -247,6 +247,8 @@ def process_interp_base64_pic(pic_base64_list, engine, x_am, sl_enabled, sl_am, 
     folder_name = "base64_pics"
     
     outpath_samples = opts.outdir_txt2img_samples
+    #remove "txt2img" from outpath_samples
+    outpath_samples = outpath_samples.replace("txt2img", "")
     #delete os.getcwd(), 'outputs', 'frame-interpolation', folder_name before creating new one
     if(os.path.exists(os.path.join(outpath_samples, 'frame-interpolation', folder_name))):
         shutil.rmtree(os.path.join(outpath_samples, 'frame-interpolation', folder_name))
