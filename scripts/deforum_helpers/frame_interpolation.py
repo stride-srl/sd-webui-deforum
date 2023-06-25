@@ -5,6 +5,9 @@ from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_ha
 from film_interpolation.film_inference import run_film_interp_infer
 from .general_utils import duplicate_pngs_from_folder, checksum, convert_images_from_list
 from modules.shared import opts
+import tempfile
+import base64
+import shutil
 
 DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
@@ -222,3 +225,46 @@ def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, 
     
     # pass param so it won't duplicate the images at all as we already do it in here?!
     process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
+
+def save_base64_to_temp_file(base64_str):
+    # save base64 to temp file
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file.write(base64.b64decode(base64_str))
+    temp_file.close()
+    return temp_file.name
+
+
+def process_interp_base64_pic(pic_base64_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_soundtrack, audio_track):
+    print("process_interp_base64_pic")
+    
+    #save base64 to temp file
+    pic_path_list = []
+    for pic in pic_base64_list:
+        pic_path_list.append(save_base64_to_temp_file(pic))
+    print(f"got a request to *frame interpolate* a set of {len(pic_base64_list)} images.")
+    folder_name = "base64_pics"
+    
+    #delete os.getcwd(), 'outputs', 'frame-interpolation', folder_name before creating new one
+    if(os.path.exists(os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name))):
+        shutil.rmtree(os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name))
+
+
+    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
+    i = 1
+    while os.path.exists(outdir_no_tmp):
+        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
+        i += 1
+
+    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
+    os.makedirs(outdir, exist_ok=True)
+
+    convert_images_from_list(paths=pic_path_list, output_dir=outdir,format='png')
+
+    audio_file_to_pass = None
+
+    if add_soundtrack == 'File':
+        audio_file_to_pass = audio_track
+
+    
+    return process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
+
