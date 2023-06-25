@@ -18,7 +18,7 @@ class InterpolateBase64PicsRequest(BaseModel):
 def deforum_api(_: gr.Blocks, app: FastAPI):
     @app.post("/deforum/interpolate_base64_pics")
     async def interpolate_base64_pics(request: InterpolateBase64PicsRequest):
-        path_video =  process_interp_base64_pic(request.base_64_pics,"FILM",60,False,2,True,"C:\\stride\\stable_diffusion\\stable-diffusion-webui\\venv\\lib\\site-packages\\imageio_ffmpeg\\binaries\\ffmpeg-win64-v4.2.2.exe",17,"slow",15,"C:\\stride\\stable_diffusion\\stable-diffusion-webui\\models/Deforum",(512, 512),None,"https://deforum.github.io/a1/A1.mp3")
+        path_video =  process_interp_base64_pic(request.base_64_pics,"FILM",60,False,2,True,"venv\\lib\\site-packages\\imageio_ffmpeg\\binaries\\ffmpeg-win64-v4.2.2.exe",17,"slow",15,"models/Deforum",(512, 512),None,"https://deforum.github.io/a1/A1.mp3")
         #get base64 of video
         video_base64 = get_base64_from_path(path_video)
         return video_base64
