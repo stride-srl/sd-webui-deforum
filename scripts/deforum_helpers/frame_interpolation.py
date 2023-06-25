@@ -204,6 +204,7 @@ def calculate_frames_to_add(total_frames, interp_x):
  
 def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_soundtrack, audio_track):
     pic_path_list = [pic.name for pic in pic_list]
+    print("f_location: ", f_location)
     print(f"got a request to *frame interpolate* a set of {len(pic_list)} images.")
     folder_name = clean_folder_name(Path(pic_list[0].orig_name).stem)
     outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
@@ -267,7 +268,7 @@ def process_interp_base64_pic(pic_base64_list, engine, x_am, sl_enabled, sl_am, 
     if add_soundtrack == 'File':
         audio_file_to_pass = audio_track
 
-    f_location = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
+    f_location_1 = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
     
-    return process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
+    return process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location_1, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
 
