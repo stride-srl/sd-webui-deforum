@@ -110,9 +110,7 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
 def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name, is_random_pics_run, srt_path=None):
     import shutil 
     
-    parent_folder = opts.outdir_samples
-    print("parent_folder: ", parent_folder)
-    print("opts", opts)
+    parent_folder = opts.outdir_samples + "/interpolated_frames_film"
 
     if orig_vid_name is not None:
         interp_vid_path = os.path.join(parent_folder, str(orig_vid_name) +'_FILM_x' + str(x_am))
@@ -169,8 +167,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     if orig_vid_name and (keep_imgs or exception_raised):
         shutil.move(custom_interp_path, parent_folder) 
     if not keep_imgs and not exception_raised:
-        if fps <= 450: # keep interp frames automatically if out_vid fps is above 450
-            shutil.rmtree(custom_interp_path, ignore_errors=True)
+        shutil.rmtree(custom_interp_path, ignore_errors=True)
     # delete duplicated raw non-interpolated frames
     shutil.rmtree(temp_convert_raw_png_path, ignore_errors=True)
     # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
