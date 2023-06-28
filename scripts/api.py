@@ -8,7 +8,7 @@ import gradio as gr
 
 #response_model=None.
 
-class InterpolateBase64PicsRequest():
+class InterpolateBase64PicsRequest(BaseModel):
     base_64_pics: List[str] = Body([], title='Base64 Pics')
     frame_amount: int = 60
 
