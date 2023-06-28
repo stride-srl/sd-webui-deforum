@@ -5,13 +5,6 @@ from scripts.deforum_helpers.frame_interpolation import process_interp_base64_pi
 import base64
 import gradio as gr
 
-from modules.api.models import *
-from modules.api import api
-
-from scripts import external_code, global_state
-from scripts.processor import preprocessor_sliders_config
-from scripts.logging import logger
-
 class InterpolateBase64PicsRequest(BaseModel):
     base_64_pics: List[str] = Body([], title='Base64 Pics')
     frame_amount: int = 60
