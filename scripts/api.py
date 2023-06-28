@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import FastAPI, Body
 from fastapi.exceptions import HTTPException
 # import process_interp_pics_upload_logic from ./scripts/deforum_helpers/frame_interpolation.py
@@ -5,7 +6,7 @@ from scripts.deforum_helpers.frame_interpolation import process_interp_base64_pi
 import base64
 import gradio as gr
 
-class InterpolateBase64PicsRequest(BaseModel):
+class InterpolateBase64PicsRequest():
     base_64_pics: List[str] = Body([], title='Base64 Pics')
     frame_amount: int = 60
 
