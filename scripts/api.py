@@ -6,12 +6,14 @@ from scripts.deforum_helpers.frame_interpolation import process_interp_base64_pi
 import base64
 import gradio as gr
 
+#response_model=None.
+
 class InterpolateBase64PicsRequest():
     base_64_pics: List[str] = Body([], title='Base64 Pics')
     frame_amount: int = 60
 
 def deforum_api(_: gr.Blocks, app: FastAPI):
-    @app.post("/deforum/interpolate_base64_pics")
+    @app.post("/deforum/interpolate_base64_pics", response_model=None)
     async def interpolate_base64_pics(request: InterpolateBase64PicsRequest):
         path_video =  process_interp_base64_pic(request.base_64_pics,"FILM",request.frame_amount,False,2,True,"venv\\lib\\site-packages\\imageio_ffmpeg\\binaries\\ffmpeg-win64-v4.2.2.exe",17,"slow",15,"models/Deforum",(512, 512),None,"https://deforum.github.io/a1/A1.mp3")
         #get base64 of video
