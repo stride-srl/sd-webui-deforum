@@ -110,8 +110,7 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
 def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name, is_random_pics_run, srt_path=None):
     import shutil 
     
-    parent_folder = os.path.dirname(raw_output_imgs_path)
-    grandparent_folder = os.path.dirname(parent_folder)
+    parent_folder = opts.outdir_samples or os.path.join(os.getcwd(), 'outputs')
     if orig_vid_name is not None:
         interp_vid_path = os.path.join(parent_folder, str(orig_vid_name) +'_FILM_x' + str(x_am))
     else:
