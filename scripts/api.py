@@ -2,7 +2,7 @@ from typing import List
 from fastapi import FastAPI, Body
 from fastapi.exceptions import HTTPException
 # import process_interp_pics_upload_logic from ./scripts/deforum_helpers/frame_interpolation.py
-from deforum_helpers.frame_interpolation import process_interp_base64_pic
+from .deforum_helpers.frame_interpolation import process_interp_base64_pic
 import base64
 import gradio as gr
 from pydantic import BaseModel
