@@ -1,7 +1,10 @@
+import base64
 import os
 from pathlib import Path
+import shutil
+import tempfile
 from rife.inference_video import run_rife_new_video_infer
-from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number, ffmpeg_stitch_video
+from .video_audio_utilities import find_ffmpeg_binary, get_quick_vid_info, vid2frames, media_file_has_audio, extract_number, ffmpeg_stitch_video
 from film_interpolation.film_inference import run_film_interp_infer
 from .general_utils import duplicate_pngs_from_folder, checksum, convert_images_from_list
 from modules.shared import opts
@@ -106,8 +109,10 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
 def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name, is_random_pics_run, srt_path=None):
     import shutil 
     
-    parent_folder = os.path.dirname(raw_output_imgs_path)
-    grandparent_folder = os.path.dirname(parent_folder)
+    parent_folder = opts.outdir_samples + "/interpolated_frames_film"
+    if not os.path.exists(parent_folder):
+        os.makedirs(parent_folder)
+
     if orig_vid_name is not None:
         interp_vid_path = os.path.join(parent_folder, str(orig_vid_name) +'_FILM_x' + str(x_am))
     else:
@@ -163,8 +168,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     if orig_vid_name and (keep_imgs or exception_raised):
         shutil.move(custom_interp_path, parent_folder) 
     if not keep_imgs and not exception_raised:
-        if fps <= 450: # keep interp frames automatically if out_vid fps is above 450
-            shutil.rmtree(custom_interp_path, ignore_errors=True)
+        shutil.rmtree(custom_interp_path, ignore_errors=True)
     # delete duplicated raw non-interpolated frames
     shutil.rmtree(temp_convert_raw_png_path, ignore_errors=True)
     # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
@@ -222,3 +226,48 @@ def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, 
     
     # pass param so it won't duplicate the images at all as we already do it in here?!
     process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
+
+def save_base64_to_temp_file(base64_str):
+    # save base64 to temp file
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file.write(base64.b64decode(base64_str))
+    temp_file.close()
+    return temp_file.name
+
+def process_interp_base64_pic(pic_base64_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_soundtrack, audio_track):
+    print("process_interp_base64_pic")
+    
+    #save base64 to temp file
+    pic_path_list = []
+    for pic in pic_base64_list:
+        pic_path_list.append(save_base64_to_temp_file(pic))
+    print(f"got a request to *frame interpolate* a set of {len(pic_base64_list)} images.")
+    folder_name = "base64_pics"
+    
+    outpath_samples = opts.outdir_txt2img_samples
+    #remove "txt2img" from outpath_samples
+    outpath_samples = outpath_samples.replace("txt2img", "")
+    #delete os.getcwd(), 'outputs', 'frame-interpolation', folder_name before creating new one
+    if(os.path.exists(os.path.join(outpath_samples, 'frame-interpolation', folder_name))):
+        shutil.rmtree(os.path.join(outpath_samples, 'frame-interpolation', folder_name))
+
+
+    outdir_no_tmp = os.path.join(outpath_samples, 'frame-interpolation', folder_name)
+    i = 1
+    while os.path.exists(outdir_no_tmp):
+        outdir_no_tmp = os.path.join(outpath_samples, 'frame-interpolation', folder_name + '_' + str(i))
+        i += 1
+
+    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
+    os.makedirs(outdir, exist_ok=True)
+
+    convert_images_from_list(paths=pic_path_list, output_dir=outdir,format='png')
+
+    audio_file_to_pass = None
+
+    if add_soundtrack == 'File':
+        audio_file_to_pass = audio_track
+
+    f_location_1 = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
+    
+    return process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location_1, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
