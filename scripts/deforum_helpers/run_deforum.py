@@ -19,6 +19,8 @@ from .settings import save_settings_from_animation_run
 last_vid_data = None
 
 def run_deforum(*args):
+    print("run_deforum() called")
+    print(f"args: {args}")
     f_location, f_crf, f_preset = get_ffmpeg_params()  # get params for ffmpeg exec
     component_names = get_component_names()
     args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
