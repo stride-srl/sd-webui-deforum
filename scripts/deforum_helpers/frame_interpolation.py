@@ -244,7 +244,7 @@ def process_interp_base64_pic(pic_base64_list, engine, x_am, sl_enabled, sl_am, 
         pic_path_list.append(save_base64_to_temp_file(pic))
     print(f"got a request to *frame interpolate* a set of {len(pic_base64_list)} images.")
     #folder name with timestamp
-    folder_name = "base64_pics_" + datetime.now().strftime("%Y%m%d_%H%M%S")
+    folder_name = "base64_pics_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     
     outpath_samples = opts.outdir_txt2img_samples
     #remove "txt2img" from outpath_samples
