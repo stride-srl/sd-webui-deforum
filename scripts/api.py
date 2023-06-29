@@ -2,7 +2,12 @@ from typing import List
 from fastapi import FastAPI, Body
 from fastapi.exceptions import HTTPException
 # import process_interp_pics_upload_logic from ./scripts/deforum_helpers/frame_interpolation.py
-from .deforum_helpers.frame_interpolation import process_interp_base64_pic
+try:
+    from scripts.deforum_helpers.frame_interpolation import process_interp_base64_pic
+except:
+    print("Exception importing api")
+
+
 import base64
 import gradio as gr
 from pydantic import BaseModel
