@@ -188,4 +188,4 @@ def run_deforum(*args):
             persistent_sett_path = shared.opts.data.get("deforum_persistent_settings_path")
             save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
 
-    return processed.images, root.timestring, generation_info_js, processed.info
+    return processed.images, root.timestring, generation_info_js, processed.info, mp4_path
