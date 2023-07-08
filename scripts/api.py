@@ -9,15 +9,25 @@ from pydantic import BaseModel
 class DeforumResponse(BaseModel):
     base64: str
     filename: str
+    mp4_path_embedded: str
 
 class InterpolateBase64PicsRequest(BaseModel):
     base_64_pics: List[str] = Body([], title="Base64 Pics")
     frame_amount: int = 60
     fps: int = 30
 
+class UploadS3Request(BaseModel):
+    mp4Path: str = Body("", title="MP4 Path Embedded")
+    filename: str = Body("", title="Name")
+
 class DeforumRequest(BaseModel):
     base_64_pic: str = Body("", title="Base64 Pic")
     mood: str = Body("", title="Mood")
+    prompt: str = Body("", title="Prompt")
+    negPrompt: str = Body("", title="NegPrompt")
+
+class UploadS3Response(BaseModel):
+    valid: bool = True
 
 def deforum_api(_: gr.Blocks, app: FastAPI):
     @app.post("/deforum/interpolate_base64_pics", response_model=str)
@@ -174,9 +184,9 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
             'None', 
             False, 
             False, 
-            '{\n  "30": "Christmas mood, snow,abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi,a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction",\n  "60": "Christmas mood,snow, abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction",\n  "100": "Christmas mood,snow, abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction"\n}\n', 
+            request.prompt, #'{\n  "30": "Christmas mood, snow,abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi,a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction",\n  "60": "Christmas mood,snow, abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction",\n  "100": "Christmas mood,snow, abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction"\n}\n', 
             '', 
-            'nsfw, nude', 
+            request.negPrompt, #'nsfw, nude, bed', 
             512, 
             512, 
             True, 
@@ -186,7 +196,7 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
             0, 
             -1, 
             'Euler a', 
-            20, 
+            25,
             'Deforum_{timestring}', 
             'iter', 
             1, 
@@ -330,17 +340,18 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
         mp4_path_embedded = embedbulgariframe(mp4_path, request.mood)
 
         #upload mp4_path_embedded to s3 on the main thread
-        upload_to_s3(mp4_path_embedded, filename)
-
+        
         with open(mp4_path_embedded, "rb") as video_file:
             encoded_string = base64.b64encode(video_file.read())
         
         return DeforumResponse(
             base64=encoded_string.decode('utf-8'),
-            filename=filename
+            filename=filename,
+            mp4_path_embedded=mp4_path_embedded
         )
 
-    def upload_to_s3(mp4_path_embedded, name):
+    @app.post("/deforum/uploads3", response_model=UploadS3Response)
+    def upload_to_s3(request: UploadS3Request):
         import boto3
 
         session = boto3.Session(
@@ -352,14 +363,18 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
         # Bucket - Bucket to upload to (the top level directory under AWS S3)
         # Key - S3 object name (can contain subdirectories). If not specified then file_name is used
         s3.meta.client.upload_file(
-            Filename=mp4_path_embedded, 
+            Filename=request.mp4Path, 
             Bucket='bulgari-bw', 
-            Key=name,
+            Key=request.filename,
             ExtraArgs={
                 'ACL': 'public-read',
                 "ContentType": "video/mp4"
                 }
             )
+        
+        return UploadS3Response(
+            valid=True
+        )
     
     def embedbulgariframe(input_file, mood="light"):
         import cv2
