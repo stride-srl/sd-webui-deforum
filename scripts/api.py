@@ -26,6 +26,7 @@ class DeforumRequest(BaseModel):
     prompt: str = Body("", title="Prompt")
     positivePrompt: str = Body("", title="PositivePrompt")
     negPrompt: str = Body("", title="NegPrompt")
+    cfg: str = Body("", title="Cfg")
 
 class UploadS3Response(BaseModel):
     valid: bool = True
@@ -87,7 +88,7 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
             '0: (1.0025+0.002*sin(1.25*3.14*t/30))', 
             '0: (0)', 
             '0: (0)', 
-            '0: (1.75)', 
+            '0: (-1.75)', 
             '0: (0.5)', 
             '0: (0.5)', 
             '0: (0)', 
@@ -99,9 +100,9 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
             '0: (0)', 
             '0: (53)', 
             '0: (0.065)', 
-            '0: (0.65)', 
+            '0: (0.55)', 
             '0: (1.0)', 
-            '0: (5)', 
+            request.cfg, 
             False, 
             '0: (25)', 
             '0: (50)', 
@@ -197,12 +198,12 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
             0, 
             -1, 
             'Euler a', 
-            25,
+            30,
             'Deforum_{timestring}', 
             'iter', 
             1, 
             True, 
-            1, 
+            0.8, 
             True, 
             'C:\\temp\\deforum.png', 
             False,
