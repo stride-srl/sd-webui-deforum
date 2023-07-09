@@ -24,6 +24,7 @@ class DeforumRequest(BaseModel):
     base_64_pic: str = Body("", title="Base64 Pic")
     mood: str = Body("", title="Mood")
     prompt: str = Body("", title="Prompt")
+    positivePrompt: str = Body("", title="PositivePrompt")
     negPrompt: str = Body("", title="NegPrompt")
 
 class UploadS3Response(BaseModel):
@@ -79,7 +80,7 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
             None, 
             False, 
             None, 
-            '2D',
+            '3D',
             120, 
             'replicate', 
             '0: (0)', 
@@ -139,7 +140,7 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
             1, 
             False, 
             False, 
-            2, 
+            3, 
             'None', 
             '0: (1)', 
             'None', 
@@ -185,7 +186,7 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
             False, 
             False, 
             request.prompt, #'{\n  "30": "Christmas mood, snow,abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi,a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction",\n  "60": "Christmas mood,snow, abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction",\n  "100": "Christmas mood,snow, abstract 3d elegant interior design room, Christmas elements, microscopic dust close - up beautiful intricately detailed cgi, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, sparkling silver,  motion design, abstract 3d  elegant interior design room, Christmas elements, orange gold, Christmas elements, a gold envelope with a white background and a white envelope with a gold envelope on it and a white envelope with a white background, Évariste Vital Luminais, angular, a 3D render, objective abstraction"\n}\n', 
-            '', 
+            request.positivePrompt, 
             request.negPrompt, #'nsfw, nude, bed', 
             512, 
             512, 
